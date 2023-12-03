@@ -1,75 +1,79 @@
 import org.junit.Test;
+import org.junit.Assert;
 
 public class TestIntegerDecode {
 
     @Test
-    public void testEmpty() throws Exception {
+    public void testEmpty() {
         try {
-            System.out.println(Integer.decode(""));
+            Integer.decode("");
+            throw new Exception("Исключение отсутствует");
+        } catch (Exception exception) {
+            Assert.assertTrue("Тип исключения не является NumberFormatException", exception instanceof NumberFormatException);
+            Assert.assertEquals("Выведено неправильное сообщение об исключении", "Zero length string", exception.getMessage());
         }
-        catch (NumberFormatException exception)
-        {
-            System.out.println("Выдано правильное исключение NumberFormatException");
-            return;
-        }
-
-        throw new Exception("Исключение отсутствует, или же не является NumberFormatException");
     }
 
     @Test
     public void plusTest() {
-        System.out.println("2 + 2 = " + (2 + Integer.decode("+2")));
+        Assert.assertEquals("Неправильно считано обыкновенное положительное число", 4, (long) Integer.decode("4"));
+        Assert.assertEquals("Неправильно считано максимальное положительное число", Integer.MAX_VALUE, (long) Integer.decode(String.valueOf(Integer.MAX_VALUE)));
+        Assert.assertEquals("Неправильно считан ноль со знаком +", 0, (long) Integer.decode("+0"));
     }
 
     @Test
     public void minusTest() {
-        System.out.println("4 - 2 = " + (4 + Integer.decode("-2")));
+        Assert.assertEquals("Неправильно считано отрицательное число", -4, (long) Integer.decode("-4"));
+        Assert.assertEquals("Неправильно считан ноль со знаком -", 0, (long) Integer.decode("-0"));
+        Assert.assertEquals("Неправильно считано минимальное отрицательное число", Integer.MIN_VALUE, (long) Integer.decode(String.valueOf(Integer.MIN_VALUE)));
     }
 
     @Test
     public void radixSpecifierTest16() {
-        System.out.println("0X10 = " + Integer.decode("0X10"));
-        System.out.println("0x10 = " + Integer.decode("0x10"));
-        System.out.println("#10 = " + Integer.decode("#10"));
+        Assert.assertEquals("Неправильно считано число в 16-ой системе счисления с префиксом 0x", 68, (long) Integer.decode("0x44"));
+        Assert.assertEquals("Неправильно считано число в 16-ой системе счисления с префиксом 0X", 68, (long) Integer.decode("0X44"));
+        Assert.assertEquals("Неправильно считано число в 16-ой системе счисления с префиксом #", 68, (long) Integer.decode("#44"));
     }
 
     @Test
     public void radixSpecifierTest8() {
-        System.out.println("010 = " + Integer.decode("010"));
+        Assert.assertEquals("Неправильно считано число в 8-ой системе счисления с префиксом 0x", 36, (long) Integer.decode("044"));
     }
 
     @Test
-    public void signCharacterWrongPositionTest() throws Exception {
+    public void signCharacterWrongPositionTest() {
         try {
-            System.out.println(Integer.decode("--10"));
+            Integer.decode("--10");
+            throw new Exception("Исключение отсутствует");
+        } catch (Exception exception) {
+            Assert.assertTrue("Тип исключения не является NumberFormatException", exception instanceof NumberFormatException);
+            Assert.assertEquals("Выведено неправильное сообщение об исключении", "Sign character in wrong position", exception.getMessage());
         }
-        catch (NumberFormatException exception) {
-            System.out.println("Выдано правильное исключение NumberFormatException");
-            return;
-        }
-
-        throw new Exception("Исключение отсутствует, или же не является NumberFormatException");
     }
 
     @Test
     public void numberFormatExceptionTest1() {
-        String minValue = String.valueOf(Integer.MIN_VALUE);
-        String maxValue = String.valueOf(Integer.MAX_VALUE);
-
-        System.out.println(minValue + " = " + Integer.decode(minValue));
-        System.out.println(maxValue + " = " + Integer.decode(maxValue));
+        checkNumberFormatException("error");
     }
 
     @Test
-    public void numberFormatExceptionTest2() throws Exception {
-        try {
-            System.out.println(Integer.decode("error"));
-        }
-        catch (NumberFormatException exception) {
-            System.out.println("Выдано правильное исключение NumberFormatException");
-            return;
-        }
+    public void numberFormatExceptionTest2() {
+        checkNumberFormatException("23O567");
+    }
 
-        throw new Exception("Исключение отсутствует, или же не является NumberFormatException");
+    @Test
+    public void numberFormatExceptionTest3() {
+        checkNumberFormatException("-44444444444444444");
+    }
+
+    private void checkNumberFormatException(String value)
+    {
+        try {
+            Integer.decode(value);
+            throw new Exception("Исключение отсутствует");
+        } catch (Exception exception) {
+            Assert.assertTrue("Тип исключения не является NumberFormatException", exception instanceof NumberFormatException);
+            Assert.assertEquals("Выведено неправильное сообщение об исключении", String.format("For input string: \"%s\"", value), exception.getMessage());
+        }
     }
 }
